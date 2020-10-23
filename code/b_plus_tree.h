@@ -16,8 +16,7 @@
 char *COLORS[] = { "IndianRed", "PaleGreen" };
 
 template <class ForwardIt, class T, class Comparator>
-ForwardIt LowerBound(ForwardIt first, ForwardIt last, const T &V,
-  Comparator comp) {
+ForwardIt LowerBound(ForwardIt first, ForwardIt last, const T &V, Comparator comp) {
   ForwardIt it;
   typename std::iterator_traits<ForwardIt>::difference_type count, step;
   count = std::distance(first, last);
@@ -64,6 +63,7 @@ class BPlusTree {
   Node *node_;
   size_t n_;
   char *mem_blk_;
+  Comparator comp_;
   enum { kMemBlkSize = 0x1000 };
 
   Node *FindLeafNodeShouldContainKey(const Key &K) const;
@@ -89,12 +89,6 @@ std::string BPlusTree<Key, Value, Comparator>::Node::ToString() const {
 template <class Key, class Value, class Comparator>
 typename BPlusTree<Key, Value, Comparator>::Node *
 BPlusTree<Key, Value, Comparator>::Insert(const Key &K, const Value &V) {
-  Value v;
-  Node *res = Lookup(K, v);
-  if (res != nullptr) {
-    return res; /* K-V already exists */
-  }
-
   if (node_ == nullptr) { /* tree is empty */
     node_ = new Node(LeafNode);
     node_->kva.push_back(std::make_pair(K, V));
@@ -102,6 +96,11 @@ BPlusTree<Key, Value, Comparator>::Insert(const Key &K, const Value &V) {
     return node_;
   }
   Node *L = FindLeafNodeShouldContainKey(K);
+  assert(L != nullptr);
+  auto ite = LowerBound(L->kva.begin(), L->kva.end(), std::make_pair(K, Value()), comp_);
+  if (ite != L->kva.end() && ite->second == V) {
+    return L; /* key-value is already exists */
+  }
   if (L->kva.size() < n_ - 1) {
     InsertInLeaf(L, K, V, nullptr);
     return L;
@@ -134,7 +133,7 @@ BPlusTree<Key, Value, Comparator>::Insert(const Key &K, const Value &V) {
   L1->ptrs.insert(L1->ptrs.begin(), T->ptrs.begin() + j, T->ptrs.end());
   L1->kva.insert(L1->kva.begin(), T->kva.begin() + j, T->kva.end());
 
-  /* K' = L1->kva.front().first */
+  /* K' = L'->kva.front().first */
   return InsertInParent(L, L1->kva.front().first, L1);
 }
 
@@ -148,7 +147,7 @@ BPlusTree<Key, Value, Comparator>::Lookup(const Key &K, Value &V) {
   if (L == nullptr) {
     return nullptr;
   }
-  auto ite = LowerBound(L->kva.begin(), L->kva.end(), std::make_pair(K, Value()), Comparator());
+  auto ite = LowerBound(L->kva.begin(), L->kva.end(), std::make_pair(K, Value()), comp_);
   if (ite != L->kva.end() && ite->first == K) {
     V = ite->second;
     return L;
@@ -239,9 +238,12 @@ typename BPlusTree<Key, Value, Comparator>::Node *
 BPlusTree<Key, Value, Comparator>::FindLeafNodeShouldContainKey(const Key &K) const {
   // Assumes no duplicate keys, and returns pointer to the record with
   // search key K if such a record exists, and null otherwise.
+  if (node_ == nullptr) {
+    return nullptr;
+  }
   Node *node = node_;
   while (node->type != LeafNode) {
-    auto ite = LowerBound(node->kva.begin(), node->kva.end(), std::make_pair(K, Value()), Comparator());
+    auto ite = LowerBound(node->kva.begin(), node->kva.end(), std::make_pair(K, Value()), comp_);
     size_t i = ite - node->kva.begin();
     if (ite == node->kva.end()) {
       /* Find last non-null pointer in the node */
