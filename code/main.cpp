@@ -86,33 +86,53 @@ TEST(BPlusTree, SimpleTest2) {
   tree.DumpToDot("test2_1.dot", "test2_2.dot");
 }
 
-//TEST(BPlusTree, Compare1) {
-//  std::vector<int> vec = std::vector<int>(static_cast<size_t>(10e4));
-//  std::map<int, int> stlmap;
-//  BPlusTree<int, int, IntComparator> bptree = BPlusTree<int, int, IntComparator>(10);
-//  clock_t start, end;
-//
-//  srand(static_cast<unsigned int>(time(nullptr)));
-//  for (size_t i = 0; i < vec.size(); ++i) {
-//    vec[i] = rand();
-//  }
-//
-//  std::cerr << "stl map INSERT test begins...\n";
-//  start = clock();
-//  for (size_t i = 0; i < vec.size(); ++i) {
-//    stlmap[vec[i]] = vec[i];
-//  }
-//  end = clock();
-//  std::cerr << "stl map INSERT test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
-//
-//  std::cerr << "B+Tree INSERT test begins...\n";
-//  start = clock();
-//  for (size_t i = 0; i < vec.size(); ++i) {
-//    bptree.Insert(vec[i], vec[i]);
-//  }
-//  end = clock();
-//  std::cerr << "B+Tree INSERT test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
-//}
+TEST(BPlusTree, Compare1) {
+  std::vector<int> vec = std::vector<int>(static_cast<size_t>(10e4));
+  std::map<int, int> stlmap;
+  BPlusTree<int, int, IntComparator> bptree = BPlusTree<int, int, IntComparator>(5);
+  clock_t start, end;
+
+  srand(static_cast<unsigned int>(time(nullptr)));
+  for (size_t i = 0; i < vec.size(); ++i) {
+    vec[i] = rand();
+  }
+
+  std::cerr << "stl map INSERT test begins...\n";
+  start = clock();
+  for (size_t i = 0; i < vec.size(); ++i) {
+    stlmap[vec[i]] = vec[i];
+  }
+  end = clock();
+  std::cerr << "stl map INSERT test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
+
+  std::cerr << "B+Tree INSERT test begins...\n";
+  start = clock();
+  for (size_t i = 0; i < vec.size(); ++i) {
+    bptree.Insert(vec[i], vec[i]);
+  }
+  end = clock();
+  std::cerr << "B+Tree INSERT test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
+
+  std::cerr << "stl map FIND test begins...\n";
+  start = clock();
+  for (size_t i = 0; i < vec.size(); ++i) {
+    auto it = stlmap.find(vec[i]);
+    ASSERT_NE(it, stlmap.end());
+    ASSERT_EQ(it->second, vec[i]);
+  }
+  end = clock();
+  std::cerr << "stl map FIND test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
+
+  std::cerr << "B+Tree FIND test begins...\n";
+  start = clock();
+  for (size_t i = 0; i < vec.size(); ++i) {
+    int v;
+    ASSERT_NE(nullptr, bptree.Lookup(vec[i], v));
+    ASSERT_EQ(v, vec[i]);
+  }
+  end = clock();
+  std::cerr << "B+Tree FIND test ends: " << static_cast<double>((end - start)) / CLOCKS_PER_SEC << "\n";
+}
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
