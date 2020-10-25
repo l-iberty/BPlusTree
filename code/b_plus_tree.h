@@ -16,7 +16,7 @@
 char *COLORS[] = { "IndianRed", "PaleGreen" };
 
 template <class ForwardIt, class T, class Comparator>
-ForwardIt LowerBound(ForwardIt first, ForwardIt last, const T &V, Comparator comp) {
+ForwardIt LowerBound(ForwardIt first, ForwardIt last, const T &value, Comparator comp) {
   ForwardIt it;
   typename std::iterator_traits<ForwardIt>::difference_type count, step;
   count = std::distance(first, last);
@@ -25,7 +25,7 @@ ForwardIt LowerBound(ForwardIt first, ForwardIt last, const T &V, Comparator com
     it = first;
     step = count / 2;
     std::advance(it, step);
-    if (comp(*it, V) < 0) {
+    if (comp(*it, value) < 0) {
       first = ++it;
       count -= step + 1;
     } else {
