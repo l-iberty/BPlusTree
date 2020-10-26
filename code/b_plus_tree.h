@@ -323,13 +323,19 @@ BPlusTree<Key, Value, Comparator>::InsertInParent(Node *N, const Key &K1, Node *
   T->ptrs.insert(ite + 1, N1);
   T->kva.insert(T->kva.begin() + i, std::make_pair(K1, Value()));
 
+  size_t pivot = (n_ + 1 + 1) / 2;
+  if (i < pivot) {
+    /* 如果 N1 被插入到前半部分, 那么分裂后 N1->parent 应该指向 P */
+    N1->parent = P;
+  }
+
   /* Erase all entries from P; Create node P' */
   P->kva.erase(P->kva.begin(), P->kva.end());
   P->ptrs.erase(P->ptrs.begin(), P->ptrs.end());
   Node *P1 = new Node(InternalNode);
 
   /* Copy T.P' ... T.P((n+1)/2) into P */
-  i = (n_ + 1 + 1) / 2;
+  i = pivot;
   P->kva.assign(T->kva.begin(), T->kva.begin() + i - 1);
   P->ptrs.assign(T->ptrs.begin(), T->ptrs.begin() + i);
   /* K'' = T.K((n+1)/2) */
@@ -338,7 +344,6 @@ BPlusTree<Key, Value, Comparator>::InsertInParent(Node *N, const Key &K1, Node *
   P1->kva.assign(T->kva.begin() + i, T->kva.end());
   P1->ptrs.assign(T->ptrs.begin() + i, T->ptrs.end());
 
-  SetParentForChildren(P);
   SetParentForChildren(P1);
   return InsertInParent(P, K2, P1);
 }
