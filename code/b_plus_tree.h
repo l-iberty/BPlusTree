@@ -50,7 +50,11 @@ class BPlusTree {
     std::string ToString() const;
   };
 
-  BPlusTree(int n) : n_(n), node_(nullptr), mem_blk_(new char[kMemBlkSize]) {}
+  BPlusTree(int n) : n_(n), node_(nullptr), mem_blk_(new char[kMemBlkSize]) {
+    if (n < 3) {
+      throw std::invalid_argument("n must be greater than 2");
+    }
+  }
   ~BPlusTree() {
     delete node_;
     delete[] mem_blk_;
@@ -65,7 +69,8 @@ class BPlusTree {
   // n_ 是 B+Tree 的阶, 就是常说的"M 阶 B+Tree"、"M-way B+Tree"的"M",
   // 是一个节点的子节点数目的最大值.
   // Every inner node other than the root is at least half full (M/2 − 1 <= num of keys <= M − 1), M/2 向上取整
-  // 基于这条规则可知, M 的最小值为3
+  // 基于这条规则可知, M 的最小值为3. 有说法认为 M=2 时就是二叉树, 但此时 (0 <= number of keys <= 1), 如果允许节点内
+  // 没有 key 就会发生一些很奇怪的情形, 所以规定 M 最小值为3
   size_t n_;
 
   char *mem_blk_;
@@ -88,6 +93,8 @@ std::string BPlusTree<Key, Value, Comparator>::Node::ToString() const {
   }
   if (i == kva.size() - 1) {
     s += std::to_string(kva[i].first) + tag;
+  } else if (kva.empty()) {
+    s += "NIL";
   }
   s += "\"";
   return s;
