@@ -61,7 +61,13 @@ class BPlusTree {
 
  private:
   Node *node_;
+
+  // n_ 是 B+Tree 的阶, 就是常说的"M 阶 B+Tree"、"M-way B+Tree"的"M",
+  // 是一个节点的子节点数目的最大值.
+  // Every inner node other than the root is at least half full (M/2 − 1 <= num of keys <= M − 1), M/2 向上取整
+  // 基于这条规则可知, M 的最小值为3
   size_t n_;
+
   char *mem_blk_;
   Comparator comp_;
   enum { kMemBlkSize = 0x1000 };
@@ -75,12 +81,13 @@ class BPlusTree {
 template <class Key, class Value, class Comparator>
 std::string BPlusTree<Key, Value, Comparator>::Node::ToString() const {
   std::string s = "\"";
-  size_t i;
-  for (i = 0; i < kva.size() - 1; ++i) {
-    s += std::to_string(kva[i].first) + " ";
+  std::string tag = (type == LeafNode) ? "*" : "";
+  int i;
+  for (i = 0; i < static_cast<int>(kva.size()) - 1; ++i) {
+    s += std::to_string(kva[i].first) + tag + " ";
   }
   if (i == kva.size() - 1) {
-    s += std::to_string(kva[i].first);
+    s += std::to_string(kva[i].first) + tag;
   }
   s += "\"";
   return s;

@@ -30,7 +30,7 @@ TEST(BPlusTree, KeyComparatorTest) {
   ASSERT_EQ(1, cmp(std::make_pair(12, 0), std::make_pair(10, 10)));
 }
 
-TEST(BPlusTree, SimpleTest) {
+TEST(BPlusTree, SimpleTest1) {
   BPlusTree<int, int, IntComparator> tree(5);
   ASSERT_NE(nullptr, tree.Insert(26, 6));
   ASSERT_NE(nullptr, tree.Insert(19, 9));
@@ -57,10 +57,35 @@ TEST(BPlusTree, SimpleTest) {
 }
 
 TEST(BPlusTree, SimpleTest2) {
+  BPlusTree<int, int, IntComparator> tree(3);
+  ASSERT_NE(nullptr, tree.Insert(26, 6));
+  ASSERT_NE(nullptr, tree.Insert(19, 9));
+  ASSERT_NE(nullptr, tree.Insert(10, 0));
+  ASSERT_NE(nullptr, tree.Insert(37, 7));
+  ASSERT_NE(nullptr, tree.Insert(3, 3));
+  ASSERT_NE(nullptr, tree.Insert(6, 6));
+  ASSERT_NE(nullptr, tree.Insert(8, 8));
+  ASSERT_NE(nullptr, tree.Insert(18, 8));
+  ASSERT_NE(nullptr, tree.Insert(13, 3));
+  ASSERT_NE(nullptr, tree.Insert(25, 5));
+  ASSERT_NE(nullptr, tree.Insert(23, 3));
+  ASSERT_NE(nullptr, tree.Insert(29, 9));
+  ASSERT_NE(nullptr, tree.Insert(30, 0));
+  ASSERT_NE(nullptr, tree.Insert(38, 8));
+  ASSERT_NE(nullptr, tree.Insert(35, 5));
+  ASSERT_NE(nullptr, tree.Insert(40, 0));
+  ASSERT_NE(nullptr, tree.Insert(31, 1));
+  ASSERT_NE(nullptr, tree.Insert(51, 1));
+  ASSERT_NE(nullptr, tree.Insert(55, 5));
+
+  std::cerr << "dumping B+Tree to dot files \"test2_1.dot\", \"test2_2\"...\n";
+  tree.DumpToDot("test2_1.dot", "test2_2.dot");
+}
+
+TEST(BPlusTree, SimpleTest3) {
   BPlusTree<int, int, IntComparator> tree(5);
   std::vector<std::pair<int, int>> kva;
   BPlusTree<int, int, IntComparator>::Node *node = nullptr;
-
 
   /* insert and lookup */
   int value;
@@ -82,8 +107,8 @@ TEST(BPlusTree, SimpleTest2) {
     ASSERT_EQ(value, kva[i].second);
   }
 
-  std::cerr << "dumping B+Tree to dot files \"test2_1.dot\", \"test2_2\"...\n";
-  tree.DumpToDot("test2_1.dot", "test2_2.dot");
+  std::cerr << "dumping B+Tree to dot files \"test3_1.dot\", \"test3_2\"...\n";
+  tree.DumpToDot("test3_1.dot", "test3_2.dot");
 }
 
 TEST(BPlusTree, Compare1) {
